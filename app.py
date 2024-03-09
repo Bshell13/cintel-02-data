@@ -1,9 +1,7 @@
 import plotly.express as px
 from shiny.express import input, ui
 from shinywidgets import render_plotly
-from palmerpenguins import (
-    load_penguins,
-)  # This package provides the Palmer Penguins dataset
+from palmerpenguins import load_penguins
 from shiny import reactive, render, req
 import seaborn as sns
 import pandas as pd
