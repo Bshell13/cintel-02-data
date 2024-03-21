@@ -12,13 +12,11 @@ penguins_df = load_penguins()
 ui.page_opts(title="Shellenberger Penguin Data", fillable=True)
 with ui.sidebar(open="open"):
     ui.h2("Sidebar")
-    # Drop Down Menu
     ui.input_selectize(
         "selected_attribute",
         "Select Attribute",
         ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"],
     )
-    # Multiple Check Boxes
     ui.input_checkbox_group(
         "selected_species_list",
         "Select Species",
@@ -26,9 +24,7 @@ with ui.sidebar(open="open"):
         selected=["Adelie"],
         inline=True,
     )
-    # Number Value
     ui.input_numeric("plotly_bin_count", "Plotly Bin Count", 30)
-    # Slider
     ui.input_slider(
         "seaborn_bin_count",
         "Seaborn Bin Count",
@@ -36,35 +32,34 @@ with ui.sidebar(open="open"):
         100,
         20,
     )
-    # Horizontal Line
     ui.hr()
-    # Link
     ui.a(
         "GitHub",
         href="https://github.com/Bshell13/cintel-02-data",
         target="_blank",
     )
 
-# Accordion Tabeset (click on a band to expand)
-with ui.accordion(id="acc", open="closed"):
-    with ui.accordion_panel("Data Table"):
+with ui.layout_columns():
+    with ui.card():
+        "Data Table"
         @render.data_frame
         def penguin_datatable():
-            return render.DataTable(penguins_df)
+            return render.DataTable(filtered_data())
 
-    with ui.accordion_panel("Data Grid"):
+    with ui.card():
+        "Data Grid"
         @render.data_frame
         def penguin_datagrid():
-            return render.DataGrid(penguins_df)
+            return render.DataGrid(filtered_data())
 
-# Navigation Card Tabset (Click on a tab to show contents)
-with ui.navset_card_tab(id="tab"):
-    with ui.nav_panel("Plotly Histogram"):
+
+with ui.layout_columns():
+    with ui.card():
 
         @render_plotly
         def plotly_histogram():
             plotly_hist = px.histogram(
-                data_frame=penguins_df,
+                data_frame=filtered_data(),
                 x=input.selected_attribute(),
                 nbins=input.plotly_bin_count(),
                 color="species",
@@ -75,12 +70,12 @@ with ui.navset_card_tab(id="tab"):
             )
             return plotly_hist
 
-    with ui.nav_panel("Seaborn Histogram"):
+    with ui.card():
 
         @render.plot
         def seaborn_histogram():
             seaborn_hist = sns.histplot(
-                data=penguins_df,
+                data=filtered_data(),
                 x=input.selected_attribute(),
                 bins=input.seaborn_bin_count(),
             )
@@ -88,20 +83,20 @@ with ui.navset_card_tab(id="tab"):
             seaborn_hist.set_xlabel("Selected Attribute")
             seaborn_hist.set_ylabel("Count")
 
-    with ui.nav_panel("Plotly Scatterplot"):
-        ui.card_header("Plotly Scatterplot: Species")
+with ui.card():
+    ui.card_header("Plotly Scatterplot: Species")
 
-        @render_plotly
-        def plotly_scatterplot():
-            plotly_scatter = px.scatter(
-                penguins_df,
-                x="bill_depth_mm",
-                y="bill_length_mm",
-                color="species",
-                size_max=8,
-                labels={
-                    "bill_depth_mm": "Bill Depth (mm)",
-                    "bill_length_mm": "Bill Length(mm)",
-                },
-            )
-            return plotly_scatter
+    @render_plotly
+    def plotly_scatterplot():
+        plotly_scatter = px.scatter(
+            filtered_data(),
+            x="bill_depth_mm",
+            y="bill_length_mm",
+            color="species",
+            size_max=8,
+            labels={
+                "bill_depth_mm": "Bill Depth (mm)",
+                "bill_length_mm": "Bill Length(mm)",
+            },
+        )
+        return plotly_scatter
